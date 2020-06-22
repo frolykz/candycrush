@@ -1,7 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
 	const grid = document.querySelector('.grid')
+	const scoreDisplay = document.getElementById('score')
 	const width = 8
 	const squares = []
+	let score = 0
 
 	const candyColors = [
 		'red',
@@ -42,29 +44,29 @@ document.addEventListener('DOMContentLoaded', () => {
 	function dragStart() {
 		colorBeingDragged = this.style.backgroundColor
 		squareIdBeingDragged = parseInt(this.id)
-		console.log(this.id, 'dragstart')
+		//console.log(this.id, 'dragstart')
 	}
 
 	function dragOver(e) {
 		e.preventDefault()
-		console.log(this.id, 'dragover')
+		//console.log(this.id, 'dragover')
 	}
 
 	function dragEnter(e) {
 		e.preventDefault()
-		console.log(this.id, 'dragenter')
+		//console.log(this.id, 'dragenter')
 	}
 
 	function dragLeave() {
-		console.log(this.id, 'dragLeave')
+		//console.log(this.id, 'dragLeave')
 	}
 
 	function dragEnd() {
-		console.log(this.id, 'dragend')
+		//console.log(this.id, 'dragend')
 	}
 
 	function dragDrop() {
-		console.log(this.id, 'dragdrop')
+		//console.log(this.id, 'dragdrop')
 		colorBeingReplaced = this.style.backgroundColor
 		squareIdBeingReplaced = parseInt(this.id)
 		this.style.backgroundColor = colorBeingDragged
@@ -72,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	}
 
 	function dragEnd() {
-		console.log(this.id, 'dragend')
+		//console.log(this.id, 'dragend')
 		// what is a move?
 		let validMoves = [
 			squareIdBeingDragged - 1,
@@ -87,9 +89,109 @@ document.addEventListener('DOMContentLoaded', () => {
 		} else if (squareIdBeingReplaced && !validMove) {
 			squares[squareIdBeingReplaced].style.backgroundColor = colorBeingReplaced
 			squares[squareIdBeingDragged].style.backgroundColor = colorBeingReplaced
-		} else squares[squareIdBeingDragged.style.backgroundColor = colorBeingDragged
+		} else squares[squareIdBeingDragged].style.backgroundColor = colorBeingDragged
 	}
 
+	//drop candies once some have been cleared
+	function moveDown() {
+		for (i = 0; i < 55; i++) {
+			if (squares[i + width].style.backgroundColor === '') {
+				squares[i + width].style.backgroundColor = squares[i].style.backgroundColor
+				squares[i].style.backgroundColor = ''
+				const firstRow = [0, 1, 2, 3, 4, 5, 6, 7]
+				const isFirstRow = firstRow.includes(i)
+				if (isFirstRow && (squares[i].style.backgroundColor === '')) {
+					let randomColor = Math.floor(Math.random() * candyColors.length)
+					squares[i].style.backgroundColor = candyColors[randomColor]
+				}
+			}
+		}
+	}
+
+	///cheking for matches
+	//check for row of Four
+	function checkRowForFour() {
+		for (i = 0; i < 60; i++) {
+			let rowOfFour = [i, i + 1, i + 2, i + 3]
+			let decidedColor = squares[i].style.backgroundColor
+			const isBlank = squares[i].style.backgroundColor === ''
+			const notValid = [5, 6, 7, 13, 14, 15, 21, 22, 23, 29, 30, 31, 37, 38, 39, 45, 46, 47, 53, 54, 55]
+			if (notValid.includes(i)) continue
+
+			if (rowOfFour.every(index => squares[index].style.backgroundColor === decidedColor && !isBlank)) {
+				score += 4
+				scoreDisplay.innerHTML = score
+				rowOfFour.forEach(index => {
+					squares[index].style.backgroundColor = ''
+				})
+			}
+		}
+	}
+	checkRowForFour()
+
+	//check for column of Four
+	function checkColumnForFour() {
+		for (i = 0; i < 39; i++) {
+			let columnOfFour = [i, i + width, i + width * 2, i + width * 3]
+			let decidedColor = squares[i].style.backgroundColor
+			const isBlank = squares[i].style.backgroundColor === ''
+
+			if (columnOfFour.every(index => squares[index].style.backgroundColor === decidedColor && !isBlank)) {
+				score += 4
+				scoreDisplay.innerHTML = score
+				columnOfFour.forEach(index => {
+					squares[index].style.backgroundColor = ''
+				})
+			}
+		}
+	}
+	checkColumnForFour()
+
+	//check for row of Three
+	function checkRowForThree() {
+		for (i = 0; i < 61; i++) {
+			let rowOfTree = [i, i + 1, i + 2]
+			let decidedColor = squares[i].style.backgroundColor
+			const isBlank = squares[i].style.backgroundColor === ''
+			const notValid = [5, 6, 7, 13, 14, 15, 21, 22, 23, 29, 30, 31, 37, 38, 39, 45, 46, 47, 53, 54, 55]
+			if (notValid.includes(i)) continue
+
+			if (rowOfTree.every(index => squares[index].style.backgroundColor === decidedColor && !isBlank)) {
+				score += 3
+				scoreDisplay.innerHTML = score
+				rowOfTree.forEach(index => {
+					squares[index].style.backgroundColor = ''
+				})
+			}
+		}
+	}
+	checkRowForThree()
+
+	//check for column of Three
+	function checkColumnForThree() {
+		for (i = 0; i < 47; i++) {
+			let columnOfTree = [i, i + width, i + width * 2]
+			let decidedColor = squares[i].style.backgroundColor
+			const isBlank = squares[i].style.backgroundColor === ''
+
+			if (columnOfTree.every(index => squares[index].style.backgroundColor === decidedColor && !isBlank)) {
+				score += 3
+				scoreDisplay.innerHTML = score
+				columnOfTree.forEach(index => {
+					squares[index].style.backgroundColor = ''
+				})
+			}
+		}
+	}
+	checkColumnForThree()
+
+	window.setInterval(function () {
+		moveDown()
+		checkRowForFour()
+		checkColumnForFour()
+		checkRowForThree()
+		checkColumnForThree()
+	}, 100)
 })
 
 
